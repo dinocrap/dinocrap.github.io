@@ -21,7 +21,6 @@ jobs:
 
       - run: npm ci
 
-      # Install Chromium dependencies for Playwright
       - run: npx playwright install --with-deps chromium
 
       - run: npm run generate
@@ -30,6 +29,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add site/wallpaper.png
-          git commit -m "daily wallpaper" || exit 0
+          git add wallpaper.png
+          git commit -m "daily wallpaper" || echo "no changes to commit"
           git push
