@@ -1,0 +1,35 @@
+name: Daily wallpaper
+
+on:
+  schedule:
+    - cron: "10 0 * * *"   # daily 00:10 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # Install Chromium dependencies for Playwright
+      - run: npx playwright install --with-deps chromium
+
+      - run: npm run generate
+
+      - name: Commit wallpaper
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add site/wallpaper.png
+          git commit -m "daily wallpaper" || exit 0
+          git push

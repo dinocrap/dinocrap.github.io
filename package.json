@@ -1,0 +1,11 @@
+{
+  "name": "dinocrap-wallpaper",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate": "node scripts/generate-wallpaper.mjs"
+  },
+  "dependencies": {
+    "playwright": "^1.49.0"
+  }
+}

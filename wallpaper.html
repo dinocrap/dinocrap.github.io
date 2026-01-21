@@ -1,0 +1,109 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      :root { --bg:#0b0b0c; --fg:#f3f3f3; --muted:#b7b7b7; }
+      html, body { margin:0; padding:0; width:1179px; height:2556px; background:var(--bg); color:var(--fg); font-family: -apple-system, system-ui, Segoe UI, Roboto, Arial; }
+      .wrap { position:relative; width:1179px; height:2556px; padding:110px 90px; box-sizing:border-box; }
+      .title { font-size:64px; font-weight:700; letter-spacing:-0.02em; }
+      .sub { margin-top:18px; font-size:34px; color:var(--muted); }
+      .big { margin-top:70px; font-size:130px; font-weight:800; letter-spacing:-0.03em; }
+      .label { margin-top:10px; font-size:34px; color:var(--muted); }
+
+      .bars { position:absolute; left:90px; right:90px; bottom:140px; }
+      .bar { margin-top:34px; }
+      .barrow { display:flex; justify-content:space-between; align-items:baseline; margin-bottom:12px; }
+      .barname { font-size:34px; font-weight:600; }
+      .barval { font-size:30px; color:var(--muted); }
+      .track { width:100%; height:22px; background:rgba(255,255,255,0.10); border-radius:999px; overflow:hidden; }
+      .fill { height:100%; width:0%; background:rgba(255,255,255,0.82); border-radius:999px; }
+      .hint { position:absolute; left:90px; right:90px; bottom:70px; font-size:26px; color:rgba(255,255,255,0.35); }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="title" id="dateLine"></div>
+      <div class="sub" id="yearLine"></div>
+
+      <div class="big" id="daysLeft"></div>
+      <div class="label">days left in this year</div>
+
+      <div class="bars">
+        <div class="bar">
+          <div class="barrow">
+            <div class="barname">Year progress</div>
+            <div class="barval" id="yearPct"></div>
+          </div>
+          <div class="track"><div class="fill" id="yearFill"></div></div>
+        </div>
+
+        <div class="bar">
+          <div class="barrow">
+            <div class="barname">Month progress</div>
+            <div class="barval" id="monthPct"></div>
+          </div>
+          <div class="track"><div class="fill" id="monthFill"></div></div>
+        </div>
+
+        <div class="bar">
+          <div class="barrow">
+            <div class="barname">Week progress</div>
+            <div class="barval" id="weekPct"></div>
+          </div>
+          <div class="track"><div class="fill" id="weekFill"></div></div>
+        </div>
+      </div>
+
+      <div class="hint">Generated daily • 1179×2556 (iPhone 16 Pro)</div>
+    </div>
+
+    <script>
+      function fmtDate(d) {
+        return d.toLocaleDateString(undefined, { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+      }
+
+      const params = new URLSearchParams(location.search);
+      // ISO date in UTC from workflow: YYYY-MM-DD
+      const iso = params.get('d');
+      const d = iso ? new Date(iso + "T12:00:00Z") : new Date();
+
+      const year = d.getUTCFullYear();
+      const startYear = new Date(Date.UTC(year, 0, 1, 0, 0, 0));
+      const endYear = new Date(Date.UTC(year + 1, 0, 1, 0, 0, 0));
+
+      const startMonth = new Date(Date.UTC(year, d.getUTCMonth(), 1, 0, 0, 0));
+      const endMonth = new Date(Date.UTC(year, d.getUTCMonth() + 1, 1, 0, 0, 0));
+
+      // Week: Monday start
+      const day = d.getUTCDay(); // 0 Sun ... 6 Sat
+      const mondayOffset = (day === 0) ? -6 : (1 - day);
+      const startWeek = new Date(Date.UTC(year, d.getUTCMonth(), d.getUTCDate() + mondayOffset, 0, 0, 0));
+      const endWeek = new Date(Date.UTC(year, d.getUTCMonth(), d.getUTCDate() + mondayOffset + 7, 0, 0, 0));
+
+      const now = d.getTime();
+
+      const yearPct = (now - startYear.getTime()) / (endYear.getTime() - startYear.getTime());
+      const monthPct = (now - startMonth.getTime()) / (endMonth.getTime() - startMonth.getTime());
+      const weekPct = (now - startWeek.getTime()) / (endWeek.getTime() - startWeek.getTime());
+
+      const clamp = (x) => Math.max(0, Math.min(1, x));
+      const pct = (x) => Math.round(clamp(x) * 100);
+
+      const daysLeft = Math.ceil((endYear.getTime() - now) / 86400000);
+
+      document.getElementById('dateLine').textContent = fmtDate(d);
+      document.getElementById('yearLine').textContent = "Year " + year;
+
+      document.getElementById('daysLeft').textContent = String(daysLeft);
+
+      document.getElementById('yearPct').textContent = pct(yearPct) + "%";
+      document.getElementById('monthPct').textContent = pct(monthPct) + "%";
+      document.getElementById('weekPct').textContent = pct(weekPct) + "%";
+
+      document.getElementById('yearFill').style.width = pct(yearPct) + "%";
+      document.getElementById('monthFill').style.width = pct(monthPct) + "%";
+      document.getElementById('weekFill').style.width = pct(weekPct) + "%";
+    </script>
+  </body>
+</html>
