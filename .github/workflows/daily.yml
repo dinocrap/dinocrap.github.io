@@ -1,0 +1,63 @@
+name: Daily wallpaper
+
+on:
+  schedule:
+    # 03:05 UTC ≈ 06:05 Vilnius (summer) / 05:05 (winter).
+    # GitHub's scheduler is best-effort and often runs 5–30 min late.
+    - cron: "5 3 * * *"
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    # Re-render on config/code changes. Note the outputs are NOT listed here,
+    # so the daily commit can never re-trigger this workflow and loop.
+    paths:
+      - "wallpaper.config.json"
+      - "scripts/**"
+      - "views/**"
+      - "lib/**"
+      - "package.json"
+      - ".github/workflows/daily.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: wallpaper
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Uses the WALLPAPER_PAT secret if you've added one, otherwise the
+          # built-in token. See README — the PAT stops GitHub auto-disabling
+          # this schedule after 60 days.
+          token: ${{ secrets.WALLPAPER_PAT || github.token }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run generate
+
+      - name: Commit if the image changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add wallpaper.png life.png last-updated.txt
+
+          if git diff --staged --quiet; then
+            echo "No change — nothing to commit."
+            exit 0
+          fi
+
+          git commit -m "wallpaper: $(date -u +%Y-%m-%d)"
+          git push
