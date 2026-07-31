@@ -1,0 +1,24 @@
+{
+  "viewMode": "year",
+  "birthDate": "1995-06-15",
+  "timezone": "Europe/Vilnius",
+  "isMondayFirst": true,
+  "yearViewLayout": "months",
+  "daysLayoutMode": "continuous",
+  "device": { "width": 1206, "height": 2622 },
+  "colors": {
+    "background": "#0d0d0d",
+    "past": "#FFFFFF",
+    "current": "#E89EB8",
+    "future": "#333333",
+    "text": "#888888"
+  },
+  "typography": { "fontFamily": "monospace", "fontSize": 0.035, "statsVisible": true },
+  "layout": { "topPadding": 0.25, "bottomPadding": 0.15, "sidePadding": 0.18, "dotSpacing": 0.7 },
+  "textElements": [],
+  "plugins": [
+    { "pluginId": "quotes", "enabled": false, "config": {} },
+    { "pluginId": "moon-phase", "enabled": false, "config": {} }
+  ],
+  "renderBothViews": true
+}
